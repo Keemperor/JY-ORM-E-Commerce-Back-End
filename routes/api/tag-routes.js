@@ -7,19 +7,16 @@ router.get('/', (req, res) => {
   // find all tags
   // be sure to include its associated Product data
   Tag.findAll({
-    include: [
-      {
-        model: Product,
-        through: ProductTag,
-        as: 'productTag_product'
-      }
-    ]
+    include: {
+      model: Product,
+      attributes: ['product_name', 'price', 'stock', 'category_id']
+    }
   })
-  .then(TagData => res.json(TagData))
-  .catch(err => {
-    console.log(err);
-    res.status(500).json(err);
-  });
+    .then(dbTagData => res.json(dbTagData))
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
 router.get('/:id', (req, res) => {
@@ -29,25 +26,16 @@ router.get('/:id', (req, res) => {
     where: {
       id: req.params.id
     },
-    include: [
-      {
-        model: Product,
-        through: ProductTag,
-        as: 'productTag_product'
-      }
-    ]
-  })
-  .then(TagData => {
-    if (!TagData) {
-      res.status(404).json({ message: 'No Tag found with this id' });
-      return;
+    include: {
+      model: Product,
+      attributes: ['product_name', 'price', 'stock', 'category_id']
     }
-    res.json(TagData);
   })
-  .catch(err => {
-    console.log(err);
-    res.status(500).json(err);
-  });
+    .then(dbTagData => res.json(dbTagData))
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
 router.post('/', (req, res) => {
@@ -55,36 +43,31 @@ router.post('/', (req, res) => {
   Tag.create({
     tag_name: req.body.tag_name
   })
-  .then(TagData => res.json(TagData))
-  .catch(err => {
-    console.log(err);
-    res.status(500).json(err);
-  });
+    .then(dbTagData => res.json(dbTagData))
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
 router.put('/:id', (req, res) => {
   // update a tag's name by its `id` value
-  Tag.update(
-    {
-      tag_name: req.body.tag_name
-    },
-    {
-      where: {
-        id: req.params.id
-      }
+  Tag.update(req.body, {
+    where: {
+      id: req.params.id
     }
-  )
-  .then(TagData => {
-    if (!TagData) {
-        res.status(404).json({ message: 'No Tag found with this id' });
-        return;
-    }
-    res.json(TagData);
   })
-  .catch(err => {
-    console.log(err);
-    res.status(500).json(err);
-  });
+    .then(dbTagData => {
+      if (!dbTagData){
+        res.status(404).json({message:'No tag found with this id'});
+        return;
+      }
+      res.json(dbTagData);
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(500).json(err);
+    });
 });
 
 router.delete('/:id', (req, res) => {
@@ -94,14 +77,14 @@ router.delete('/:id', (req, res) => {
       id: req.params.id
     }
   })
-  .then(TagData => {
-    if (!TagData) {
-        res.status(404).json({ message: 'No Tag found with this id' });
-        return;
+  .then(dbTagData => {
+    if (!dbTagData) {
+      res.status(404).json({message: 'No tag found with this id'});
+      return;
     }
-    res.json(TagData);
-    })
-    .catch(err => {
+    res.json(dbTagData);
+  })
+  .catch(err =>{
     console.log(err);
     res.status(500).json(err);
   });
